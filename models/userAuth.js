@@ -319,6 +319,7 @@ const userSchema = new mongoose.Schema(
     showStoreSection: { type: Boolean, default: true },
     showCommunitySection: { type: Boolean, default: true },
     showAboutSection: { type: Boolean, default: true },
+    showContact: { type: Boolean, default: true },
     // for workspace membership
   },
 

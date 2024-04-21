@@ -79,9 +79,10 @@ router.get("/getimage/:id", async (req, res) => {
 
 router.post("/savetemppro/:id", async (req, res) => {
 	try {
+		console.log(req.body)
 		const { id } = req.params;
 		const user = await User.findById(id);
-		const { store, about, community, curr_template1, curr_template2, webt } = req.body;
+		const { store, about, community, contact, curr_template1, curr_template2, webt } = req.body;
 
 		if (user) {
 			user.prositeweb_template = curr_template1
@@ -95,6 +96,9 @@ router.post("/savetemppro/:id", async (req, res) => {
 			}
 			if (about !== undefined && about !== null) {
 				user.showAboutSection = about;
+			}
+			if (contact !== undefined && contact !== null) {
+				user.showContact = contact;
 			}
 			await user.save()
 			res.status(200).json({ success: true });
