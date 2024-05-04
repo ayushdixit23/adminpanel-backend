@@ -24,6 +24,7 @@ const adminnoti = require("../fireb");
 const Reports = require("../models/reports");
 const Form = require("../models/Form");
 const { S3Client, PutObjectCommand } = require("@aws-sdk/client-s3");
+const { latestUser } = require("./admincom");
 
 const minioClient = new Minio.Client({
   endPoint: "minio.grovyo.xyz",
@@ -1113,40 +1114,40 @@ exports.store = async (req, res) => {
       .lean();
 
     const store = pendingRequests.map((request) => ({
-      userid: request.userid,
-      id: request._id,
-      fullname: request.userid.fullname,
-      username: request.userid.username,
-      pic: process.env.URL + request.userid.profilepic,
-      address: request.storeDetails,
-      documentphoto: process.env.URL + request.storeDetails.documentfile,
-      createdAt: request.createdAt,
-      communities: request.userid.communitycreated.length,
+      userid: request?.userid,
+      id: request?._id,
+      fullname: request?.userid.fullname,
+      username: request?.userid.username,
+      pic: process.env.URL + request?.userid.profilepic,
+      address: request?.storeDetails,
+      documentphoto: process.env.URL + request?.storeDetails.documentfile,
+      createdAt: request?.createdAt,
+      communities: request?.userid.communitycreated.length,
     }));
 
     const product = [];
     for (const request of approvedRequests) {
       const products = await Product.find({
         isverified: "in review",
-        creator: request.userid,
+        creator: request?.userid,
       });
       const actualProducts = products.map((product) => ({
         id: product._id,
         name: product.name,
-        dp: process.env.PRODUCT_URL + product.images[0].content,
+        dp: process.env.PRODUCT_URL + product?.images[0]?.content,
       }));
 
       const data = {
-        id: request._id,
-        userid: request.userid,
-        fullname: request.userid.fullname,
-        username: request.userid.username,
-        pic: process.env.URL + request.userid.profilepic,
-        address: request.storeDetails,
+        id: request?._id,
+        userid: request?.userid,
+        fullname: request?.userid.fullname,
+        username: request?.userid.username,
+        pic: process.env.URL + request?.userid.profilepic,
+        address: request?.storeDetails,
         products: actualProducts,
-        documentphoto: process.env.URL + request.storeDetails.documentfile,
-        createdAt: request.createdAt,
-        communities: request.userid.communitycreated.length,
+        documentphoto: process.env.URL + request?.storeDetails.documentfile,
+        createdAt: request?.createdAt,
+        communities: request?.userid.communitycreated.length,
       };
       product.push(data);
     }
@@ -1797,47 +1798,47 @@ exports.dashboard = async (req, res) => {
       3
     );
     let community = [];
-    for (let i = 0; i < monetization.length; i++) {
-      comm = await Community.findById(monetization[i].community.toString());
-      const user = await User.findById(comm.creator);
+    for (let i = 0; i < monetization?.length; i++) {
+      comm = await Community.findById(monetization[i]?.community.toString());
+      const user = await User.findById(comm?.creator);
 
       const mon = await Montenziation.findOne({ community: comm?._id });
 
       const posts = await Post.find({ community: comm?._id });
 
       let eng = [];
-      await posts.map((p, i) => {
+      await posts?.map((p, i) => {
         let final =
           p.views <= 0 ? 0 : (parseInt(p?.likes) / parseInt(p?.views)) * 100;
         eng.push(final);
       });
 
       let sum = 0;
-      for (let i = 0; i < eng.length; i++) {
+      for (let i = 0; i < eng?.length; i++) {
         sum += eng[i];
       }
       let avg = 0;
 
       if (eng.length > 0) {
-        avg = Math.round(sum / eng.length);
+        avg = Math.round(sum / eng?.length);
       } else {
         avg = 0;
       }
 
       const data = {
-        username: user.username,
-        fullname: user.fullname,
-        profilepic: process.env.URL + user.profilepic,
-        userid: user._id,
+        username: user?.username,
+        fullname: user?.fullname,
+        profilepic: process.env.URL + user?.profilepic,
+        userid: user?._id,
         requested: mon?.createdAt,
-        title: comm.title,
-        dp: process.env.URL + comm.dp,
-        topics: comm.topics.length,
-        posts: comm.totalposts,
-        members: comm.memberscount,
-        category: comm.category,
-        id: comm._id,
-        createdAt: comm.createdAt,
+        title: comm?.title,
+        dp: process.env.URL + comm?.dp,
+        topics: comm?.topics.length,
+        posts: comm?.totalposts,
+        members: comm?.memberscount,
+        category: comm?.category,
+        id: comm?._id,
+        createdAt: comm?.createdAt,
         engagement: avg,
       };
 
@@ -1854,45 +1855,67 @@ exports.dashboard = async (req, res) => {
       .lean();
 
     const store = pendingRequests.map((request) => ({
-      userid: request.userid,
-      id: request._id,
-      fullname: request.userid.fullname,
-      username: request.userid.username,
-      pic: process.env.URL + request.userid.profilepic,
-      address: request.storeDetails,
-      documentphoto: process.env.URL + request.storeDetails.documentfile,
-      createdAt: request.createdAt,
-      communities: request.userid.communitycreated.length,
+      userid: request?.userid,
+      id: request?._id,
+      fullname: request?.userid.fullname,
+      username: request?.userid.username,
+      pic: process.env.URL + request?.userid.profilepic,
+      address: request?.storeDetails,
+      documentphoto: process.env.URL + request?.storeDetails.documentfile,
+      createdAt: request?.createdAt,
+      communities: request?.userid.communitycreated.length,
     }));
 
     const product = [];
     for (const request of approvedRequests) {
       const products = await Product.find({
         isverified: "in review",
-        creator: request.userid,
+        creator: request?.userid,
       });
       const actualProducts = products.map((product) => ({
         id: product._id,
         name: product.name,
-        dp: process.env.PRODUCT_URL + product.images[0].content,
+        dp: process.env.PRODUCT_URL + product?.images[0]?.content,
       }));
 
       const data = {
-        id: request._id,
-        userid: request.userid,
-        fullname: request.userid.fullname,
-        username: request.userid.username,
-        pic: process.env.URL + request.userid.profilepic,
-        address: request.storeDetails,
+        id: request?._id,
+        userid: request?.userid,
+        fullname: request?.userid.fullname,
+        username: request?.userid.username,
+        pic: process.env.URL + request?.userid.profilepic,
+        address: request?.storeDetails,
         products: actualProducts,
-        documentphoto: process.env.URL + request.storeDetails.documentfile,
-        createdAt: request.createdAt,
-        communities: request.userid.communitycreated.length,
+        documentphoto: process.env.URL + request?.storeDetails.documentfile,
+        createdAt: request?.createdAt,
+        communities: request?.userid.communitycreated.length,
       };
       product.push(data);
     }
 
-    res.status(200).json({ success: true, community, product, store });
+    const users = await User.find().sort({ _id: -1 }).limit(30);
+    const latestUsers = []
+    for (let i = 0; i < users.length; i++) {
+      const com = await Community.find({ creator: users[i]?._id })
+      const obj = {
+        id: users[i]._id,
+        fullname: users[i].fullname,
+        username: users[i].username,
+        profilepic: process.env.URL + users[i].profilepic,
+        email: users[i].email,
+        phone: users[i].phone,
+        username: users[i].username,
+        totalCommunities: users[i].communitycreated.length,
+        community: com.map((d) => ({ dp: process.env.URL + d?.dp, title: d?.title })),
+        storeCreatedOrNot: users[i].storeAddress.length > 0 ? "Yes!" : "No!",
+        address: users[i].address.streetaddress,
+        state: users[i].address.state,
+        city: users[i].address.city,
+      }
+      latestUsers.push(obj)
+    }
+
+    res.status(200).json({ success: true, community, product, store, data: latestUsers });
   } catch (error) {
     console.log(error);
     res.status(400).json({ success: false, message: "Something went wrong!" });
@@ -2591,7 +2614,6 @@ exports.forms = async (req, res) => {
     console.log(error)
   }
 }
-
 
 exports.formUpload = async (req, res) => {
   try {

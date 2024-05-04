@@ -36,6 +36,7 @@ const {
   approveAds,
   formUpload,
   forms,
+  latestUserstofetch,
 } = require("../controllers/admin");
 const router = express.Router();
 const storage = multer.memoryStorage();
