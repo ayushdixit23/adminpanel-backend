@@ -25,6 +25,7 @@ const Reports = require("../models/reports");
 const Form = require("../models/Form");
 const { S3Client, PutObjectCommand } = require("@aws-sdk/client-s3");
 const { latestUser } = require("./admincom");
+const Cancellation = require("../models/cancellation");
 
 const minioClient = new Minio.Client({
   endPoint: "minio.grovyo.xyz",
@@ -2643,3 +2644,44 @@ exports.formUpload = async (req, res) => {
     console.log(error)
   }
 }
+
+exports.cancelao = async (req, res) => {
+  try {
+    const { id, ordid } = req.params;
+    const { reason } = req.body;
+    const user = await User.findById(id);
+    const order = await Order.findById(ordid);
+
+    if (!user) {
+      return res.status(404).json({ message: "User or Product not found" });
+    } else {
+      await Order.updateOne(
+        { _id: order._id },
+        { $set: { currentStatus: "cancelled", reason: reason } }
+      );
+
+      res.status(200).json({ success: true });
+    }
+  } catch (e) {
+    console.log(e);
+    res.status(400).json({ success: false });
+  }
+};
+
+exports.cancellationrequest = async (req, res) => {
+  try {
+    const { userid, orderId } = req.params
+    const { reason } = req.body
+    const cancel = new Cancellation({
+      userid,
+      orderId,
+      reason,
+    })
+    await cancel.save()
+    res.status(200).json({ success: true })
+  } catch (error) {
+    res.status(400).json({ success: false, message: "Something Went Wrong!" })
+  }
+}
+
+router.post("/cancellationrequest/:userid/:orderId", cancellationrequest)
