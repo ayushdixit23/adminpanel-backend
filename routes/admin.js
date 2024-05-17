@@ -37,6 +37,7 @@ const {
   formUpload,
   forms,
   latestUserstofetch,
+  latestCommunities,
 } = require("../controllers/admin");
 const router = express.Router();
 const storage = multer.memoryStorage();
@@ -82,5 +83,6 @@ router.get("/v1/fetchBanks", fetchBanks);
 router.post("/approveBank/:id", approveBank);
 router.post("/v1/form", upload.single("doc"), formUpload);
 router.get("/v1/adminform", forms);
+router.get("/v1/latestCommunities", latestCommunities);
 
 module.exports = router;

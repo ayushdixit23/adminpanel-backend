@@ -2684,4 +2684,58 @@ exports.cancellationrequest = async (req, res) => {
   }
 }
 
-router.post("/cancellationrequest/:userid/:orderId", cancellationrequest)
+exports.latestCommunities = async (req, res) => {
+  try {
+    const community = await Community.find().sort({ _id: -1 }).limit(30);
+    const communityData = []
+    for (let i = 0; i < community.length; i++) {
+      const posts = await Post.find({ community: community[i]?._id });
+      const user = await User.findById(community[i].creator)
+
+      let eng = [];
+      await posts.map((p, i) => {
+        let final =
+          p.views <= 0 ? 0 : (parseInt(p?.likes) / parseInt(p?.views)) * 100;
+        eng.push(final);
+      });
+
+      let sum = 0;
+      for (let i = 0; i < eng.length; i++) {
+        sum += eng[i];
+      }
+      let avg = 0;
+
+      if (eng.length > 0) {
+        avg = Math.round(sum / eng.length);
+      } else {
+        avg = 0;
+      }
+
+      const data = {
+        username: user.username,
+        fullname: user.fullname,
+        profilepic: process.env.URL + user.profilepic,
+        userid: user._id,
+        title: community[i].title,
+        type: community[i].type,
+        dp: process.env.URL + community[i].dp,
+        topics: community[i].topics.length,
+        createAt: community[i].createdAt,
+        posts: community[i].totalposts,
+        members: community[i].memberscount,
+        category: community[i].category,
+        id: community[i]._id,
+        createdAt: community[i].createdAt,
+        engagement: avg,
+      };
+
+      communityData.push(data)
+    }
+
+    res.status(200).json({ success: true, communityData })
+
+  } catch (error) {
+    res.status(400).json({ success: false, message: "Something Went Wrong!" })
+    console.log(error)
+  }
+}
