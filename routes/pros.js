@@ -54,6 +54,35 @@ router.post("/uploaddata/:id", upload.single("file"), async (req, res) => {
 	}
 });
 
+router.post("/background/:id", upload.single("file"), async (req, res) => {
+	try {
+		const { id } = req.params;
+		const user = await User.findById(id);
+		if (user) {
+			const uuidString = uuid();
+			const objectName = `${Date.now()}${uuidString}${req.file.originalname}`;
+			const result = await s3.send(
+				new PutObjectCommand({
+					Bucket: BUCKET_NAME,
+					Key: objectName,
+					Body: req.file.buffer,
+					ContentType: req.file.mimetype,
+				})
+			);
+			await User.updateOne({ _id: id }, { $push: { backgroundImage: objectName } });
+			const link = process.env.URL + objectName;
+			res.status(200).json({ success: true, link });
+		} else {
+			res.status(404).json({ message: "User not found", success: false });
+		}
+	} catch (e) {
+		res.status(409).json({
+			message: e.message,
+			success: false,
+		});
+	}
+});
+
 router.get("/getimage/:id", async (req, res) => {
 	try {
 		const { id } = req.params;
@@ -62,6 +91,29 @@ router.get("/getimage/:id", async (req, res) => {
 			let elinks = [];
 			for (let i = 0; i < user.contents.length; i++) {
 				let a = process.env.URL + user.contents[i];
+				elinks.push(a);
+			}
+			const links = elinks.reverse()
+			res.status(200).json({ links, success: true });
+		} else {
+			res.status(404).json({ message: "User not found!", success: false });
+		}
+	} catch (e) {
+		console.log(e);
+		res
+			.status(400)
+			.json({ message: "Something went wrong...", success: false });
+	}
+});
+
+router.get("/getbackground/:id", async (req, res) => {
+	try {
+		const { id } = req.params;
+		const user = await User.findById(id);
+		if (user) {
+			let elinks = [];
+			for (let i = 0; i < user.backgroundImage.length; i++) {
+				let a = process.env.URL + user.backgroundImage[i];
 				elinks.push(a);
 			}
 			const links = elinks.reverse()

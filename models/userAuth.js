@@ -320,6 +320,7 @@ const userSchema = new mongoose.Schema(
     showCommunitySection: { type: Boolean, default: true },
     showAboutSection: { type: Boolean, default: true },
     showContact: { type: Boolean, default: true },
+    backgroundImage: [{ type: String }]
     // for workspace membership
   },
 
