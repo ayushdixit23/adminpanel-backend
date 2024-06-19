@@ -299,12 +299,40 @@ const userSchema = new mongoose.Schema(
         ref: "Subscriptions",
       },
     ],
+
     limits: {
       productlimit: { type: Number },
       topiclimit: { type: Number },
       communitylimit: { type: Number },
       collectionlimit: { type: Number },
       // prositelimit: { type: Number }
+    },
+    // recent history for prosites
+    recentProsites: [{
+      htmlContent: { type: String },
+      canvasImage: { type: String },
+      template: { type: Number },
+      headline: { type: String },
+      description: { type: String },
+      backgroundColor: { type: String },
+      backgroundImage: { type: String },
+      color: { type: String },
+      image: { type: String },
+      fonts: [{
+        fontFamily: { type: String },
+        link: { type: String },
+        type: { type: String },
+        id: { type: ObjectId, ref: "Font" }
+      }],
+      button: {
+        text: { type: String },
+        link: { type: String },
+        id: { type: ObjectId, ref: "Buttonss" }
+      }
+    }],
+    customDomain: {
+      domain: { type: String },
+      status: { type: String, default: "pending", enum: ["active", "pending", "rejected"] }
     },
     isStoreVerified: { type: Boolean, default: false },
     contents: [{ type: String }],

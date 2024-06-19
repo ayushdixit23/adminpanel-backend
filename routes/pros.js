@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const multer = require("multer");
+const mongoose = require("mongoose")
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 const { S3Client, PutObjectCommand } = require("@aws-sdk/client-s3");
@@ -11,6 +12,7 @@ const axios = require("axios");
 const User = require("../models/userAuth");
 const uuid = require("uuid").v4;
 const BUCKET_NAME = process.env.BUCKET_NAME;
+const ObjectId = mongoose.Types.ObjectId;
 // const POST_BUCKET = process.env.POST_BUCKET;
 
 const s3 = new S3Client({
@@ -131,14 +133,49 @@ router.get("/getbackground/:id", async (req, res) => {
 
 router.post("/savetemppro/:id", async (req, res) => {
 	try {
-		console.log(req.body)
+		// console.log(req.body)
 		const { id } = req.params;
 		const user = await User.findById(id);
-		const { store, about, community, contact, curr_template1, curr_template2, webt } = req.body;
+		const { store, about, community, canvasImage,
+			template,
+			backgroundColor,
+			backgroundImage,
+			headline,
+			description,
+			color,
+			image,
+			fonts,
+			button, contact, curr_template1, curr_template2, webt } = req.body;
 
 		if (user) {
 			user.prositeweb_template = curr_template1
 			user.prositemob_template = curr_template2
+
+			const prositeData = {
+				htmlContent: curr_template1,
+				canvasImage,
+				template,
+				backgroundColor,
+				backgroundImage,
+				headline,
+				description,
+				color,
+				image,
+				fonts: fonts.map(font => ({
+					...font,
+					id: ObjectId.isValid(font.id) ? font.id : null
+				})),
+				button: {
+					...button,
+					id: ObjectId.isValid(button.id) ? button.id : null
+				}
+			}
+
+			if (user.recentProsites.length == 0) {
+				user.recentProsites = [prositeData]
+			} else {
+				user.recentProsites.push(prositeData)
+			}
 			user.prositepic = webt
 			if (store !== undefined && store !== null) {
 				user.showStoreSection = store;
@@ -231,6 +268,26 @@ router.delete("/deletetemp/:id", async (req, res) => {
 		res.status(200).json({ success: true, message: "Template Deleted!" })
 	} catch (error) {
 		console.log(error)
+	}
+})
+
+router.post("/setDomain/:id", async (req, res) => {
+	try {
+		const { id } = req.params
+		const { domain } = req.body
+		const user = await User.findById(id)
+		if (!user) {
+			return res.status(400).json({ success: false, message: "User Not Found!" })
+		}
+		const domainObject = {
+			domain,
+			status: "pending"
+		}
+		user.customDomain = domainObject
+		await user.save()
+		res.status(200).json({ success: true })
+	} catch (error) {
+		res.status(400).json({ success: false, message: "Something Went Wrong!" })
 	}
 })
 
