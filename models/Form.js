@@ -7,6 +7,10 @@ const formScehma = new mongoose.Schema({
 	phone: String,
 	email: String,
 	job: String,
+	perspective: String,
+	yourAchievements: String,
+	experienceUsingGrovyo: String,
+	careerPlans: String,
 	message: String
 })
 

@@ -2619,7 +2619,7 @@ exports.forms = async (req, res) => {
 exports.formUpload = async (req, res) => {
   try {
     console.log(req.body, req.file)
-    const { name, batch, phone, email, job, message } = req.body
+    const { name, batch, phone, email, job, perspective, yourAchievements, careerPlans, experienceUsingGrovyo, message } = req.body
     const image = req.file
     const uuidString = uuid();
     const objectName = `${Date.now()}_${uuidString}_${image.originalname}`;
@@ -2633,7 +2633,11 @@ exports.formUpload = async (req, res) => {
     );
 
     const form = new Form({
-      name, doc: objectName, batch, phone, email, job, message
+      name, doc: objectName, batch, phone, email, job, message,
+      perspective,
+      yourAchievements,
+      experienceUsingGrovyo,
+      careerPlans,
     })
 
     await form.save()
