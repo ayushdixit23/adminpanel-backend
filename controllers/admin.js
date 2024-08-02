@@ -1894,7 +1894,7 @@ exports.dashboard = async (req, res) => {
       product.push(data);
     }
 
-    const users = await User.find().sort({ _id: -1 }).limit(30);
+    const users = await User.find().sort({ _id: -1 }).limit(200);
     const latestUsers = []
     for (let i = 0; i < users.length; i++) {
       const com = await Community.find({ creator: users[i]?._id })
@@ -2690,7 +2690,7 @@ exports.cancellationrequest = async (req, res) => {
 
 exports.latestCommunities = async (req, res) => {
   try {
-    const community = await Community.find().sort({ _id: -1 }).limit(30);
+    const community = await Community.find().sort({ _id: -1 }).limit(100);
     const communityData = []
     for (let i = 0; i < community.length; i++) {
       const posts = await Post.find({ community: community[i]?._id });
